@@ -1,13 +1,16 @@
 package com.example.app;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
-
 import android.os.Bundle;
+import android.text.Editable;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -29,6 +32,11 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+
+    private StitchAppClient stitchClient;
+    private RemoteMongoCollection itemsCollection;
+
+
     final StitchAppClient client =
             Stitch.initializeDefaultAppClient("placas-android-fnqxq");
 
@@ -37,6 +45,9 @@ public class MainActivity extends AppCompatActivity {
 
     final RemoteMongoCollection<Document> coll =
             mongoClient.getDatabase("Placas").getCollection("PlacasCarros");
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+/*
         client.getAuth().loginWithCredential(new AnonymousCredential()).continueWithTask(
                 new Continuation<StitchUser, Task<RemoteUpdateResult>>() {
 
@@ -91,18 +103,59 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+ */
         changeScreen();
     }
 
 
+    private void findDocument(String placa){
+
+
+
+        Document filterDoc = new Document()
+                .append("placa", placa);
+
+        final Task <Document> findTask = coll.find(filterDoc).limit(1).first();
+        findTask.addOnCompleteListener(new OnCompleteListener <Document> () {
+            @Override
+            public void onComplete(@NonNull Task <Document> task) {
+                if (task.isSuccessful()) {
+                    if (task.getResult() == null) {
+                        Log.d("app", "Could not find any matching documents");
+                    } else {
+                        Log.d("app", String.format("successfully found document: %s",
+                                task.getResult().toString()));
+                        System.out.println("Resultado: " + task.getResult().toJson());
+                        String placa = task.getResult().get("placa").toString();
+                        String cor = task.getResult().get("cor").toString();
+                        boolean roubado = (boolean) task.getResult().get("roubado");
+                        PlacaInfo pl = new PlacaInfo(placa, cor, roubado);
+                        startActivity(new Intent(MainActivity.this, informationActivity.class).
+                                putExtra("myPlaca", pl));
+                    }
+                } else {
+                    Log.e("app", "failed to find document with: ", task.getException());
+                }
+            }
+        });
+    }
+
     private void changeScreen() {
+
+        EditText consultaPlaca = (EditText) findViewById(R.id.inserirPlaca);
+
 
         Button btn = (Button) findViewById(R.id.search);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this, informationActivity.class));
+                System.out.println("AAAAAAAAAAAAAAAAAAAAAA: " + consultaPlaca.getText().toString());
+
+                findDocument(consultaPlaca.getText().toString());
             }
         });
+
+
     }
 }
