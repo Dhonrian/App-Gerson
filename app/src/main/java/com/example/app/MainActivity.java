@@ -53,7 +53,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
+        Stitch.getDefaultAppClient().getAuth().loginWithCredential(new AnonymousCredential()).addOnCompleteListener(new OnCompleteListener<StitchUser>() {
+                                                                                                                        @Override
+                                                                                                                        public void onComplete(@NonNull final Task<StitchUser> task) {
+                                                                                                                            if (task.isSuccessful()) {
+                                                                                                                                Log.d("stitch", "logged in anonymously");
+                                                                                                                            } else {
+                                                                                                                                Log.e("stitch", "failed to log in anonymously", task.getException());
+                                                                                                                            }
+                                                                                                                        }
 
 
 /*
@@ -105,7 +113,9 @@ public class MainActivity extends AppCompatActivity {
 
 
  */
+        });
         changeScreen();
+
     }
 
 
