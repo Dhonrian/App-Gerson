@@ -1,6 +1,9 @@
 package com.example.app;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.text.Editable;
 import android.util.Log;
@@ -53,69 +56,22 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Stitch.getDefaultAppClient().getAuth().loginWithCredential(new AnonymousCredential()).addOnCompleteListener(new OnCompleteListener<StitchUser>() {
-                                                                                                                        @Override
-                                                                                                                        public void onComplete(@NonNull final Task<StitchUser> task) {
-                                                                                                                            if (task.isSuccessful()) {
-                                                                                                                                Log.d("stitch", "logged in anonymously");
-                                                                                                                            } else {
-                                                                                                                                Log.e("stitch", "failed to log in anonymously", task.getException());
-                                                                                                                            }
-                                                                                                                        }
+        if(isConnected()) {
 
-
-/*
-        client.getAuth().loginWithCredential(new AnonymousCredential()).continueWithTask(
-                new Continuation<StitchUser, Task<RemoteUpdateResult>>() {
-
-                    @Override
-                    public Task<RemoteUpdateResult> then(@NonNull Task<StitchUser> task) throws Exception {
-                        if (!task.isSuccessful()) {
-                            Log.e("STITCH", "Login failed!");
-                            throw task.getException();
-                        }
-
-                        final Document updateDoc = new Document(
-                                "owner_id",
-                                task.getResult().getId()
-                        );
-
-                        updateDoc.put("number", 42);
-                        return coll.updateOne(
-                                null, updateDoc, new RemoteUpdateOptions().upsert(true)
-                        );
+            Stitch.getDefaultAppClient().getAuth().loginWithCredential(new AnonymousCredential()).addOnCompleteListener(new OnCompleteListener<StitchUser>() {
+                @Override
+                public void onComplete(@NonNull final Task<StitchUser> task) {
+                    if (task.isSuccessful()) {
+                        Log.d("stitch", "logged in anonymously");
+                    } else {
+                        Log.e("stitch", "failed to log in anonymously", task.getException());
                     }
                 }
-        ).continueWithTask(new Continuation<RemoteUpdateResult, Task<List<Document>>>() {
-            @Override
-            public Task<List<Document>> then(@NonNull Task<RemoteUpdateResult> task) throws Exception {
-                if (!task.isSuccessful()) {
-                    Log.e("STITCH", "Update failed!");
-                    throw task.getException();
-                }
-                List<Document> docs = new ArrayList<>();
-                return coll
-                        .find(new Document("owner_id", client.getAuth().getUser().getId()))
-                        .limit(100)
-                        .into(docs);
-            }
-        }).addOnCompleteListener(new OnCompleteListener<List<Document>>() {
-            @Override
-            public void onComplete(@NonNull Task<List<Document>> task) {
-                if (task.isSuccessful()) {
-                    Log.d("STITCH", "Found docs: " + task.getResult().toString());
-                    return;
-                }
-                Log.e("STITCH", "Error: " + task.getException().toString());
-                task.getException().printStackTrace();
-            }
-        });
-
-
- */
-        });
-        changeScreen();
-
+            });
+            changeScreen();
+        } else {
+            System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        }
     }
 
 
@@ -165,7 +121,18 @@ public class MainActivity extends AppCompatActivity {
                 findDocument(consultaPlaca.getText().toString());
             }
         });
-
-
     }
+
+    private boolean isConnected(){
+        ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        if(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
+                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
+            //we are connected to a network
+            return true;
+        }
+        else
+            return false;
+}
+
+
 }
