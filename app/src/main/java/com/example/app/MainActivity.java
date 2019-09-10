@@ -6,11 +6,13 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -56,28 +58,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if(isConnected()) {
 
-            Stitch.getDefaultAppClient().getAuth().loginWithCredential(new AnonymousCredential()).addOnCompleteListener(new OnCompleteListener<StitchUser>() {
-                @Override
-                public void onComplete(@NonNull final Task<StitchUser> task) {
-                    if (task.isSuccessful()) {
-                        Log.d("stitch", "logged in anonymously");
-                    } else {
-                        Log.e("stitch", "failed to log in anonymously", task.getException());
-                    }
-                }
-            });
-            changeScreen();
-        } else {
-            System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-        }
+
+
+        changeScreen();
     }
 
 
     private void findDocument(String placa){
-
-
 
         Document filterDoc = new Document()
                 .append("placa", placa);
@@ -89,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     if (task.getResult() == null) {
                         Log.d("app", "Could not find any matching documents");
+
                     } else {
                         Log.d("app", String.format("successfully found document: %s",
                                 task.getResult().toString()));
@@ -107,7 +96,20 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
     private void changeScreen() {
+
+        Stitch.getDefaultAppClient().getAuth().loginWithCredential(new AnonymousCredential()).addOnCompleteListener(new OnCompleteListener<StitchUser>() {
+            @Override
+            public void onComplete(@NonNull final Task<StitchUser> task) {
+                if (task.isSuccessful()) {
+                    Log.d("stitch", "logged in anonymously");
+                } else {
+                    Log.e("stitch", "failed to log in anonymously", task.getException());
+                }
+            }
+        });
+
 
         EditText consultaPlaca = (EditText) findViewById(R.id.inserirPlaca);
 
@@ -116,9 +118,21 @@ public class MainActivity extends AppCompatActivity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                System.out.println("AAAAAAAAAAAAAAAAAAAAAA: " + consultaPlaca.getText().toString());
 
-                findDocument(consultaPlaca.getText().toString());
+                if(isConnected()) {
+                    if (TextUtils.isEmpty(consultaPlaca.getText())) {
+                        consultaPlaca.setError("Campo Vazio!");
+                    } else {
+                        findDocument(consultaPlaca.getText().toString());
+                    }
+                } else {
+                    Context context = getApplicationContext();
+                    CharSequence text = "É necessário estar conectado a internet";
+                    int duration = Toast.LENGTH_SHORT;
+
+                    Toast toast = Toast.makeText(context, text, duration);
+                    toast.show();
+                }
             }
         });
     }
