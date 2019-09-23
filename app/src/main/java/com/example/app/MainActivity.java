@@ -6,11 +6,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -23,6 +26,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -42,20 +46,24 @@ import com.mongodb.stitch.core.services.mongodb.remote.RemoteUpdateResult;
 
 import org.bson.Document;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
+    private Geocoder geocoder;
     private Location mLastLocation;
     public LocationManager mLocationManager;
 
-    private StitchAppClient stitchClient;
-    private RemoteMongoCollection itemsCollection;
+
     int LOCATION_REFRESH_TIME = 1000;
     int LOCATION_REFRESH_DISTANCE = 5;
+
+
 
 
     final StitchAppClient client =
@@ -68,10 +76,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             mongoClient.getDatabase("Placas").getCollection("PlacasCarro");
 
 
+    @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        geocoder = new Geocoder(this, Locale.getDefault());
+
 
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
@@ -88,7 +100,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
         changeScreen();
-        System.out.println(mLocationListener);
+        System.out.println("aaaaaaaa: " + mLocationManager.isLocationEnabled());
+
     }
 
 
@@ -99,12 +112,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             System.out.println("onLocationChanged");
 
             mLastLocation = location;
-        }
-
-        public void getLocation(Location location) {
-
-            System.out.println("LATIDUDE: " + location.getLatitude() + "LONGITUDE:   " + location.getLongitude());
-
         }
 
         @Override
@@ -180,6 +187,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                List<Address> addresses = null;
+
+
+                try {
+                     addresses = geocoder.getFromLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 1);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                String endereco = addresses.get(0).getAddressLine(0);
+
+                System.out.println("AAAAAA: " + endereco);
+
+
 
                 if(isConnected()) {
                     if (TextUtils.isEmpty(consultaPlaca.getText())) {
