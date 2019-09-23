@@ -1,6 +1,8 @@
 package com.example.app;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -22,6 +24,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -62,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             client.getServiceClient(RemoteMongoClient.factory, "MongoDB-Placas-Service");
 
     final RemoteMongoCollection<Document> coll =
-            mongoClient.getDatabase("Placas").getCollection("PlacasCarros");
+            mongoClient.getDatabase("Placas").getCollection("PlacasCarro");
 
 
     @Override
@@ -71,33 +74,36 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         setContentView(R.layout.activity_main);
 
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+
         if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    Activity#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for Activity#requestPermissions for more details.
+
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION}, 101);
+
             return;
         }
         mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME,
                 LOCATION_REFRESH_DISTANCE, mLocationListener);
 
 
-
         changeScreen();
+        System.out.println(mLocationListener);
     }
 
 
-    private final LocationListener mLocationListener = new LocationListener() {
+    public final LocationListener mLocationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
             //code
             System.out.println("onLocationChanged");
 
             mLastLocation = location;
+        }
 
+        public void getLocation(Location location) {
+
+            System.out.println("LATIDUDE: " + location.getLatitude() + "LONGITUDE:   " + location.getLongitude());
 
         }
 
@@ -115,6 +121,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         public void onProviderDisabled(String s) {
 
         }
+
+
+
+
+
     };
 
     private void findDocument(String placa){
@@ -135,8 +146,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                 task.getResult().toString()));
                         System.out.println("Resultado: " + task.getResult().toJson());
                         String placa = task.getResult().get("placa").toString();
-                        String cor = task.getResult().get("cor").toString();
-                        boolean roubado = (boolean) task.getResult().get("roubado");
+                        String cor = task.getResult().get("veiculo.0.cor.descricao").toString();
+                        boolean roubado = (boolean) task.getResult().get("veiculo.0.indicadorRouboFurto");
                         PlacaInfo pl = new PlacaInfo(placa, cor, roubado);
                         startActivity(new Intent(MainActivity.this, informationActivity.class).
                                 putExtra("myPlaca", pl));
@@ -164,7 +175,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
         EditText consultaPlaca = (EditText) findViewById(R.id.inserirPlaca);
-
 
         Button btn = (Button) findViewById(R.id.search);
         btn.setOnClickListener(new View.OnClickListener() {
