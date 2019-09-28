@@ -3,19 +3,24 @@ package com.example.app;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class PlacaInfo implements Parcelable {
+public class Info implements Parcelable {
 
     private String placa;
     private String cor;
     private boolean roubado;
 
-    public PlacaInfo(String placa, String cor, boolean roubado) {
+
+
+    private String local;
+
+    public Info(String placa, String cor, boolean roubado) {
         this.placa = placa;
         this.cor = cor;
         this.roubado = roubado;
+        this.local = local;
     }
 
-    protected PlacaInfo(Parcel in) {
+    protected Info(Parcel in) {
         placa = in.readString();
         cor = in.readString();
         roubado = in.readByte() != 0;
@@ -33,15 +38,15 @@ public class PlacaInfo implements Parcelable {
         return 0;
     }
 
-    public static final Creator<PlacaInfo> CREATOR = new Creator<PlacaInfo>() {
+    public static final Creator<Info> CREATOR = new Creator<Info>() {
         @Override
-        public PlacaInfo createFromParcel(Parcel in) {
-            return new PlacaInfo(in);
+        public Info createFromParcel(Parcel in) {
+            return new Info(in);
         }
 
         @Override
-        public PlacaInfo[] newArray(int size) {
-            return new PlacaInfo[size];
+        public Info[] newArray(int size) {
+            return new Info[size];
         }
     };
 
@@ -68,4 +73,12 @@ public class PlacaInfo implements Parcelable {
     public void setRoubado(boolean roubado) {
         this.roubado = roubado;
     }
+    public String getLocal() {
+        return local;
+    }
+
+    public void setLocal(String local) {
+        this.local = local;
+    }
+
 }

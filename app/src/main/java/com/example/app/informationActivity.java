@@ -15,14 +15,14 @@ public class informationActivity extends AppCompatActivity {
         TextView text = (TextView) findViewById(R.id.teste);
 
 
-        PlacaInfo pl = getIntent().getExtras().getParcelable("myPlaca");
+        Info pl = getIntent().getExtras().getParcelable("myPlaca");
         String roubado = isRoubado(pl);
 
         text.setText("Placa: "+ pl.getPlaca()+ "\n" + "Cor: " + pl.getCor()+  "\n" + "Roubado: " + roubado);
 
     }
 
-    private String isRoubado(PlacaInfo p){
+    private String isRoubado(Info p){
         if (p.isRoubado()){
             return "Sim";
         } else {

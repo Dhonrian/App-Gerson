@@ -1,8 +1,6 @@
 package com.example.app;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -15,13 +13,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.Editable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -32,7 +28,6 @@ import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.mongodb.stitch.android.core.Stitch;
@@ -41,13 +36,13 @@ import com.mongodb.stitch.android.core.auth.StitchUser;
 import com.mongodb.stitch.android.services.mongodb.remote.RemoteMongoClient;
 import com.mongodb.stitch.android.services.mongodb.remote.RemoteMongoCollection;
 import com.mongodb.stitch.core.auth.providers.anonymous.AnonymousCredential;
-import com.mongodb.stitch.core.services.mongodb.remote.RemoteUpdateOptions;
-import com.mongodb.stitch.core.services.mongodb.remote.RemoteUpdateResult;
 
 import org.bson.Document;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -141,27 +136,48 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .append("placa", placa);
 
         final Task <Document> findTask = coll.find(filterDoc).limit(1).first();
-        findTask.addOnCompleteListener(new OnCompleteListener <Document> () {
-            @Override
-            public void onComplete(@NonNull Task <Document> task) {
-                if (task.isSuccessful()) {
-                    if (task.getResult() == null) {
-                        Log.d("app", "Could not find any matching documents");
+        findTask.addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                if (task.getResult() == null) {
+                    Log.d("app", "Could not find any matching documents");
 
-                    } else {
-                        Log.d("app", String.format("successfully found document: %s",
-                                task.getResult().toString()));
-                        System.out.println("Resultado: " + task.getResult().toJson());
-                        String placa = task.getResult().get("placa").toString();
-                        String cor = task.getResult().get("veiculo.0.cor.descricao").toString();
-                        boolean roubado = (boolean) task.getResult().get("veiculo.0.indicadorRouboFurto");
-                        PlacaInfo pl = new PlacaInfo(placa, cor, roubado);
-                        startActivity(new Intent(MainActivity.this, informationActivity.class).
-                                putExtra("myPlaca", pl));
-                    }
                 } else {
-                    Log.e("app", "failed to find document with: ", task.getException());
+                    Log.d("app", String.format("successfully found document: %s",
+                            task.getResult().toString()));
+
+                    JSONObject jsonObj;
+                    JSONArray veiculo;
+                    JSONObject vObj = null;
+                    JSONObject corObj = null;
+
+                    try {
+                        jsonObj = new JSONObject(task.getResult().toJson());
+                        veiculo = jsonObj.getJSONArray("veiculo");
+                        vObj = veiculo.getJSONObject(0);
+                        corObj = vObj.getJSONObject("cor");
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+
+                    String placa1 = task.getResult().get("placa").toString();
+                    String cor = "";
+                    boolean roubado = false;
+                    try {
+                        cor = corObj.getString("descricao");
+                        roubado = vObj.getBoolean("indicadorRouboFurto");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println(cor);
+                    System.out.println(roubado);
+                    Info pl = new Info(placa1, cor, roubado);
+                    startActivity(new Intent(MainActivity.this, informationActivity.class).
+                            putExtra("myPlaca", pl));
                 }
+            } else {
+                Log.e("app", "failed to find document with: ", task.getException());
             }
         });
     }
