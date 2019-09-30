@@ -8,16 +8,13 @@ public class Info implements Parcelable {
     private String placa;
     private String cor;
     private boolean roubado;
-
-
-
-    private String local;
+    private double lat;
+    private double lon;
 
     public Info(String placa, String cor, boolean roubado) {
         this.placa = placa;
         this.cor = cor;
         this.roubado = roubado;
-        this.local = local;
     }
 
     protected Info(Parcel in) {
@@ -70,15 +67,20 @@ public class Info implements Parcelable {
         return roubado;
     }
 
-    public void setRoubado(boolean roubado) {
-        this.roubado = roubado;
-    }
-    public String getLocal() {
-        return local;
+    public double getLon() {
+        return lon;
     }
 
-    public void setLocal(String local) {
-        this.local = local;
+    public void setLon(double lon) {
+        this.lon = lon;
+    }
+
+    public double getLat() {
+        return lat;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
     }
 
 }

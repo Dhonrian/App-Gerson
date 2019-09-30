@@ -50,7 +50,6 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
-    private Geocoder geocoder;
     private Location mLastLocation;
     public LocationManager mLocationManager;
 
@@ -77,7 +76,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        geocoder = new Geocoder(this, Locale.getDefault());
 
 
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -170,11 +168,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    System.out.println(cor);
-                    System.out.println(roubado);
+
                     Info pl = new Info(placa1, cor, roubado);
+                    pl.setLat(mLastLocation.getLatitude());
+                    pl.setLon(mLastLocation.getLongitude());
+
                     startActivity(new Intent(MainActivity.this, informationActivity.class).
                             putExtra("myPlaca", pl));
+                    System.out.println("PL" + pl.getLon());
+
                 }
             } else {
                 Log.e("app", "failed to find document with: ", task.getException());
@@ -203,20 +205,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                List<Address> addresses = null;
-
-
-                try {
-                     addresses = geocoder.getFromLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 1);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                String endereco = addresses.get(0).getAddressLine(0);
-
-                System.out.println("AAAAAA: " + endereco);
-
-
 
                 if(isConnected()) {
                     if (TextUtils.isEmpty(consultaPlaca.getText())) {
