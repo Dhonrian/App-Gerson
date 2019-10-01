@@ -21,6 +21,8 @@ public class Info implements Parcelable {
         placa = in.readString();
         cor = in.readString();
         roubado = in.readByte() != 0;
+        lat = in.readDouble();
+        lon = in.readDouble();
     }
 
     @Override
@@ -28,6 +30,8 @@ public class Info implements Parcelable {
         dest.writeString(placa);
         dest.writeString(cor);
         dest.writeByte((byte) (roubado ? 1 : 0));
+        dest.writeDouble(lat);
+        dest.writeDouble(lon);
     }
 
     @Override

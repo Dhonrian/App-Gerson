@@ -7,7 +7,11 @@ import android.location.Geocoder;
 import android.os.Bundle;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.MapView;
+
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -16,22 +20,22 @@ public class informationActivity extends AppCompatActivity {
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_information);
 
+
         TextView text = (TextView) findViewById(R.id.teste);
         TextView end = (TextView) findViewById(R.id.end);
+        TextView time = (TextView) findViewById(R.id.tempo);
 
         geocoder = new Geocoder(this, Locale.getDefault());
-
+        SimpleDateFormat currentTime = new SimpleDateFormat("dd/MM/yyyy '-' HH:mm:ss");
+        String timeText = currentTime.format(new Date());
 
         Info pl = getIntent().getExtras().getParcelable("myPlaca");
         String roubado = isRoubado(pl);
-        System.out.println("AAAAAAAAAAAA" + pl.getPlaca());
-        System.out.println("aaaaaaaa" + pl.getLat()+ " " + pl.getLon());
         text.setText("Placa: "+ pl.getPlaca()+ "\n" + "Cor: " + pl.getCor()+  "\n" + "Roubado: " + roubado);
-        //end.setText(pl.getLocal());
         List<Address> addresses = null;
 
 
@@ -42,7 +46,8 @@ public class informationActivity extends AppCompatActivity {
         }
 
         String endereco = addresses.get(0).getAddressLine(0);
-        System.out.println(endereco);
+        end.setText(endereco);
+        time.setText(timeText);
 
     }
 
@@ -53,4 +58,6 @@ public class informationActivity extends AppCompatActivity {
             return "Não";
         }
     }
+
+
 }
