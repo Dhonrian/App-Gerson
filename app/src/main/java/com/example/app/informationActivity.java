@@ -1,6 +1,6 @@
 package com.example.app;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentActivity;
 
 import android.location.Address;
 import android.location.Geocoder;
@@ -8,8 +8,10 @@ import android.os.Bundle;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
+
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -17,11 +19,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class informationActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class informationActivity extends FragmentActivity implements OnMapReadyCallback {
     private Geocoder geocoder = null;
 
-    private MapView mMapView;
-    public static final String MAPVIEW_BUNDLE_KEY = "MapViewBundleKey";
+    private GoogleMap mMapView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -32,16 +33,10 @@ public class informationActivity extends AppCompatActivity implements OnMapReady
         TextView text = (TextView) findViewById(R.id.teste);
         TextView end = (TextView) findViewById(R.id.end);
         TextView time = (TextView) findViewById(R.id.tempo);
-        MapView mMapView = (MapView) findViewById(R.id.mapView);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
 
-        Bundle mapViewBundle = null;
-        if (savedInstanceState != null) {
-            mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
-        }
-
-        mMapView.onCreate(mapViewBundle);
-
-        mMapView.getMapAsync(this);
+        mapFragment.getMapAsync(this);
 
         geocoder = new Geocoder(this, Locale.getDefault());
         SimpleDateFormat currentTime = new SimpleDateFormat("dd/MM/yyyy '-' HH:mm:ss");
@@ -72,28 +67,10 @@ public class informationActivity extends AppCompatActivity implements OnMapReady
         }
     }
 
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        googleMap.setMyLocationEnabled(true);
-    }
-
-    @Override
-    public void onPause() {
-        mMapView.onPause();
-        super.onPause();
-    }
-
-    @Override
-    public void onDestroy() {
-        mMapView.onDestroy();
-        super.onDestroy();
-    }
-
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        mMapView.onLowMemory();
+        mMapView = googleMap;
+        mMapView.setMyLocationEnabled(true);
     }
 }
 

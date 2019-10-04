@@ -93,8 +93,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
         changeScreen();
-        System.out.println("aaaaaaaa: " + mLocationManager.isLocationEnabled());
-
     }
 
 
@@ -205,6 +203,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //startActivity(new Intent(MainActivity.this, MapsActivity.class));
 
                 if(isConnected()) {
                     if (TextUtils.isEmpty(consultaPlaca.getText())) {
@@ -220,6 +219,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     Toast toast = Toast.makeText(context, text, duration);
                     toast.show();
                 }
+
             }
         });
     }
