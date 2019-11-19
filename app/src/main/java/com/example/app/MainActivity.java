@@ -119,11 +119,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         public void onProviderDisabled(String s) {
 
         }
-
-
-
-
-
     };
 
     private void findDocument(String placa){
@@ -145,12 +140,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     JSONArray veiculo;
                     JSONObject vObj = null;
                     JSONObject corObj = null;
+                    JSONObject catObj = null;
+                    JSONObject posObj = null;
 
                     try {
                         jsonObj = new JSONObject(task.getResult().toJson());
                         veiculo = jsonObj.getJSONArray("veiculo");
                         vObj = veiculo.getJSONObject(0);
                         corObj = vObj.getJSONObject("cor");
+                        catObj = vObj.getJSONObject("tipoCarroceria");
+                        posObj = vObj.getJSONObject("possuidor");
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -159,15 +158,23 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
                     String placa1 = task.getResult().get("placa").toString();
                     String cor = "";
+                    String categoria = "";
+                    String nome = "";
+                    String nDoc = "";
+                    String origem = "";
                     boolean roubado = false;
                     try {
                         cor = corObj.getString("descricao");
                         roubado = vObj.getBoolean("indicadorRouboFurto");
+                        categoria = catObj.getString("descricao");
+                        nome = posObj.getString("nome");
+                        nDoc = posObj.getString("numeroDocumento");
+                        origem = posObj.getString("origem");
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
 
-                    Info pl = new Info(placa1, cor, roubado);
+                    Info pl = new Info(placa1, cor, roubado, categoria, nome, nDoc, origem);
                     pl.setLat(mLastLocation.getLatitude());
                     pl.setLon(mLastLocation.getLongitude());
 

@@ -56,7 +56,9 @@ public class informationActivity extends FragmentActivity implements OnMapReadyC
         lon = pl.getLon();
 
         String roubado = isRoubado(pl);
-        text.setText("Placa: "+ pl.getPlaca()+ "\n" + "Cor: " + pl.getCor()+  "\n" + "Roubado: " + roubado);
+        text.setText("Placa: "+ pl.getPlaca()+ "\n" + "Cor: " + pl.getCor()+  "\n" + "Roubado: " + roubado + "\n" + "Categoria: "
+        + pl.getCategoria() + "Nome: " + pl.getNome_possuidor() + "\n" + "Documento: " + pl.getDoc_possuidor() + "\n" + "Origem: " + pl.getUF_possuidor());
+
         List<Address> addresses = null;
 
         try {
